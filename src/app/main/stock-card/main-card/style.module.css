@@ -5,8 +5,44 @@
   margin-bottom: 0.25rem!important;
 }
 
-.titleColLeft {
-  max-width: 320px!important;
+table tr td:first-child {
+  display: flex;
+  justify-content: space-between;
+  min-width: 320px;
+  padding-right: 15px;
+}
+
+table tr td:nth-child(2) {
+  width: 95px;
+  padding-right: 15px;
+}
+
+table tr td:nth-child(2) span {
+  float: left;
+}
+
+table tr td:nth-child(2) b {
+  float: right;
+}
+
+table tr td:nth-child(3) {
+  width: 120px;
+}
+
+table tr td:nth-child(3) span {
+  float: left;
+}
+
+table tr td:nth-child(3) b {
+  float: right;
+}
+
+.larger {
+  font-size: 19.2px;
+}
+
+.smaller {
+  font-size: 14px;
 }
 
 .icon:hover {
@@ -31,12 +67,7 @@
   justify-content: space-between;
 }
 
-.larger {
-  font-size: 19.2px;
-  justify-content: space-between;
-}
-
-.smaller {
-  font-size: 18px;
-  justify-content: space-between;
+hr {
+  margin-bottom: .25rem!important;
+  margin-top: .25rem!important;
 }

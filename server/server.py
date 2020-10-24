@@ -51,7 +51,8 @@ def get_live_quote():
         'low': round(float(quote['Day\'s Range'].split(' - ')[0]), 3),
         'high': round(float(quote['Day\'s Range'].split(' - ')[1]), 3),
         'bidVolume': round(float(quote['Bid'].split(' x ')[1]), 3),
-        'askVolume': round(float(quote['Ask'].split(' x ')[1]), 3)
+        'askVolume': round(float(quote['Ask'].split(' x ')[1]), 3),
+        'marketStatus': 'Market Close'
     }
     return jsonify(data)
 
