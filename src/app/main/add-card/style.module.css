@@ -1,0 +1,24 @@
+.card {
+  margin-top: 1rem;
+  height: 30rem;
+  width: 100%;
+  border-radius: .5rem!important;
+}
+
+.body {
+  display: table;
+  height: 100%;
+  border-radius: .5rem!important;
+}
+.body:hover {
+  background-color: #f3f3f3;
+  cursor: pointer;
+}
+
+.span {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 4rem;
+  color: grey;
+}

@@ -1,0 +1,42 @@
+.title {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.2rem!important;
+  margin-bottom: 0.25rem!important;
+}
+
+.titleColLeft {
+  max-width: 320px!important;
+}
+
+.icon:hover {
+  cursor: pointer;
+  color: #8a8a8a;
+}
+
+.green {
+  color: green;
+}
+
+.red {
+  color: red;
+}
+
+.grey {
+  color: grey;
+}
+
+.spaceBetween {
+  display: flex;
+  justify-content: space-between;
+}
+
+.larger {
+  font-size: 19.2px;
+  justify-content: space-between;
+}
+
+.smaller {
+  font-size: 18px;
+  justify-content: space-between;
+}
