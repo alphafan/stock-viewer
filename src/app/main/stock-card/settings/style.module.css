@@ -27,3 +27,8 @@
 .span {
   cursor: pointer;
 }
+
+img {
+  width: 100%;
+  max-width: 130px;
+}
