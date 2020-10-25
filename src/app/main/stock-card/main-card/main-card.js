@@ -22,10 +22,8 @@ const MainCard = ({ ticker, symbol, handleSettingsIconClicked }) => {
         setSocketIsLoading(false);
       });
       return () => {
-        if (socket) {
-          socket.close();
-          setSocket(null);
-        }
+        socket.close();
+        setSocket(null);
       };
     }
   };
