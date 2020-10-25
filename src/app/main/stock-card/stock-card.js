@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
 import { MDBCard, MDBCardBody } from 'mdbreact';
 
 import Settings from './settings';
 import MainCard from './main-card';
+import * as actions from '../../../ducks/actions';
 import style from './style.module.css';
 
-const StockCard = ({ card: { cardId } }) => {
+const StockCard = ({ card: { cardId }, removeCard }) => {
 
   const [ticker, setTicker] = useState();
   const [symbol, setSymbol] = useState();
@@ -19,20 +21,24 @@ const StockCard = ({ card: { cardId } }) => {
   const handleSettingsIconClicked = () => {
     setPageId('Settings');
   };
+  const handleRemoveCard = () => {
+    removeCard(cardId);
+  }
 
   return (
     <MDBCard className={style.card}>
       <MDBCardBody className={style.body}>
         {pageId === 'Settings' ?
           <Settings
-            cardId={cardId}
             ticker={ticker}
             handleSelectTicker={handleSelectTicker}
+            handleRemoveCard={handleRemoveCard}
           />
           :
           <MainCard
             ticker={ticker}
             symbol={symbol}
+            handleRemoveCard={handleRemoveCard}
             handleSettingsIconClicked={handleSettingsIconClicked}
           />
         }
@@ -40,5 +46,8 @@ const StockCard = ({ card: { cardId } }) => {
     </MDBCard>
   );
 }
+const mapDispatchToProps = dispatch => ({
+  removeCard: cardId => dispatch(actions.removeCard(cardId))
+})
 
-export default StockCard;
+export default connect(undefined, mapDispatchToProps)(StockCard);

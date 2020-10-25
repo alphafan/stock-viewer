@@ -1,35 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import io from 'socket.io-client';
 
 import MainCardTitle from './main-card-title';
 import { SERVER_ROOT_URL } from '../../../../common/constants';
+import Loading from '../../../../common/components/loading';
 
 const MainCard = ({ ticker, symbol, handleSettingsIconClicked }) => {
 
   const [quote, setQuote] = useState({});
+  const [socket, setSocket] = useState(null);
+  const [socketIsLoading, setSocketIsLoading] = useState(false);
 
-  useEffect(() => {
-    async function fetchLiveQuote() {
-      const result = await axios.post(`http://${SERVER_ROOT_URL}/api/get_live_quote`, { ticker });
-      setQuote(result.data);
+  const fetchLiveQuote = () => {
+    if (!socket) {
+      setSocketIsLoading(true);
+      setSocket(io.connect(`${SERVER_ROOT_URL}`), { reconnection: false });
+    } else {
+      socket.emit('get-live-quote', ticker);
+      socket.on('live-quote-response', response => {
+        setQuote(JSON.parse(response));
+        setSocketIsLoading(false);
+      });
+      return () => {
+        if (socket) {
+          socket.close();
+          setSocket(null);
+        }
+      };
     }
-    const interval = setInterval(() => {
-      fetchLiveQuote();
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [ticker]);
-  
-  return (
-    <>
-      <MainCardTitle
-        ticker={ticker}
-        symbol={symbol}
-        quote={quote}
-        handleSettingsIconClicked={handleSettingsIconClicked}
-      />
-      <hr />
-    </>
-  );
+  };
+
+  useEffect(fetchLiveQuote, [socket, ticker]);
+
+  if (socketIsLoading) {
+    return (
+      <Loading />
+    );
+  } else {
+    return (
+      <>
+        <MainCardTitle
+          ticker={ticker}
+          symbol={symbol}
+          quote={quote}
+          handleSettingsIconClicked={handleSettingsIconClicked}
+        />
+        <hr />
+      </>
+    );
+  }
 }
 
 export default MainCard;

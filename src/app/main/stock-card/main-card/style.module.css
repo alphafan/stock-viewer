@@ -5,35 +5,35 @@
   margin-bottom: 0.25rem!important;
 }
 
-table tr td:first-child {
+table tbody tr td:first-child {
   display: flex;
   justify-content: space-between;
   min-width: 320px;
   padding-right: 15px;
 }
 
-table tr td:nth-child(2) {
+table tbody tr td:nth-child(2) {
   width: 95px;
   padding-right: 15px;
 }
 
-table tr td:nth-child(2) span {
+table tbody tr td:nth-child(2) span {
   float: left;
 }
 
-table tr td:nth-child(2) b {
+table tbody tr td:nth-child(2) b {
   float: right;
 }
 
-table tr td:nth-child(3) {
+table tbody tr td:nth-child(3) {
   width: 120px;
 }
 
-table tr td:nth-child(3) span {
+table tbody tr td:nth-child(3) span {
   float: left;
 }
 
-table tr td:nth-child(3) b {
+table tbody tr td:nth-child(3) b {
   float: right;
 }
 

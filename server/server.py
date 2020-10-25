@@ -1,11 +1,61 @@
+import json
+import logging
+import time
+from threading import Thread
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import json
+from flask_socketio import SocketIO
 from yahoo_fin import stock_info as si
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 CORS(app)
+io = SocketIO(app, cors_allowed_origins="*")
+
+# session id to thread mapping
+THREAD_POOL = {}
+
+
+class LiveQuoteThread(Thread):
+
+    def __init__(self, ticker, session_id, pause=10):
+        super().__init__()
+        self.ticker = ticker
+        self.session_id = session_id
+        self.pause = pause
+
+    def run(self):
+        self.get_live_quote()
+
+    def get_live_quote(self):
+        while True:
+            global THREAD_POOL
+            if self.session_id not in THREAD_POOL:
+                raise SystemExit
+            try:
+                quote = si.get_quote_table(self.ticker)
+                data = self._parse_yahoo_quote(quote)
+                io.emit('live-quote-response', json.dumps(data))
+            finally:
+                time.sleep(self.pause)
+
+    @staticmethod
+    def _parse_yahoo_quote(quote):
+        return {
+            'price': round(quote['Quote Price'], 3),
+            'bid': round(float(quote['Bid'].split(' x ')[0]), 3),
+            'ask': round(float(quote['Ask'].split(' x ')[0]), 3),
+            'open': round(quote['Open'], 3),
+            'prevClose': round(quote['Previous Close'], 3),
+            'change': round(quote['Quote Price'] - quote['Previous Close'], 3),
+            'changePercentage': round((quote['Quote Price']-quote['Previous Close'])/quote['Previous Close'] * 100, 3),
+            'low': round(float(quote['Day\'s Range'].split(' - ')[0]), 3),
+            'high': round(float(quote['Day\'s Range'].split(' - ')[1]), 3),
+            'bidVolume': round(float(quote['Bid'].split(' x ')[1]), 3),
+            'askVolume': round(float(quote['Ask'].split(' x ')[1]), 3),
+            'marketStatus': 'Market Close'
+        }
 
 
 @app.route('/api/get_tickers')
@@ -17,10 +67,32 @@ def get_tickers():
     return jsonify(data)
 
 
-@app.route('/api/get_live_quote', methods=['POST'])
-def get_live_quote():
-    ticker = json.loads(request.data)['ticker']
-    quote = si.get_quote_table(ticker)
+@io.on('connect')
+def connect():
+    logging.info('Someone connect to socket, session id:', request.sid)
+
+
+@io.on('disconnect')
+def disconnect():
+    global THREAD_POOL
+    thread = THREAD_POOL.pop(request.sid)
+    thread.join()
+
+
+@io.on('get-live-quote')
+def get_live_quote(ticker):
+    global THREAD_POOL
+    session_id = request.sid
+    thread = LiveQuoteThread(ticker, session_id)
+    THREAD_POOL[session_id] = thread
+    thread.start()
+
+
+if __name__ == '__main__':
+    io.run(app, debug=True)
+    # http_server = WSGIServer(('', 5000), app, handler_class=WebSocketHandler)
+    # http_server.serve_forever()
+
     # print(quote)
     # data = {'1y Target Est': 17.65,
     #         '52 Week Range': '8.350 - 26.950',
@@ -39,22 +111,3 @@ def get_live_quote():
     #         'Previous Close': 22.35,
     #         'Quote Price': 21.850000381469727,
     #         'Volume': 89578040.0}
-    data = {
-        'price': round(quote['Quote Price'], 3),
-        'bid': round(float(quote['Bid'].split(' x ')[0]), 3),
-        'ask': round(float(quote['Ask'].split(' x ')[0]), 3),
-        'open': round(quote['Open'], 3),
-        'prevClose': round(quote['Previous Close'], 3),
-        'change': round(quote['Quote Price'] - quote['Previous Close'], 3),
-        'changePercentage': round((quote['Quote Price'] - quote['Previous Close']) / quote['Previous Close'] * 100, 3),
-        'low': round(float(quote['Day\'s Range'].split(' - ')[0]), 3),
-        'high': round(float(quote['Day\'s Range'].split(' - ')[1]), 3),
-        'bidVolume': round(float(quote['Bid'].split(' x ')[1]), 3),
-        'askVolume': round(float(quote['Ask'].split(' x ')[1]), 3),
-        'marketStatus': 'Market Close'
-    }
-    return jsonify(data)
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
