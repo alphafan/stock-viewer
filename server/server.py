@@ -13,16 +13,16 @@ app.config['SECRET_KEY'] = 'secret!'
 CORS(app)
 io = SocketIO(app, cors_allowed_origins="*")
 
-# session id to thread mapping
+# ticker id to thread mapping
 THREAD_POOL = {}
+SESSION_TO_TICKER = {}
 
 
 class LiveQuoteThread(Thread):
 
-    def __init__(self, ticker, session_id, pause=1):
+    def __init__(self, ticker, pause=1):
         super().__init__()
         self.ticker = ticker
-        self.session_id = session_id
         self.pause = pause
 
     def run(self):
@@ -31,7 +31,7 @@ class LiveQuoteThread(Thread):
     def get_live_quote(self):
         while True:
             global THREAD_POOL
-            if self.session_id not in THREAD_POOL:
+            if self.ticker not in THREAD_POOL:
                 raise SystemExit
             try:
                 quote = si.get_quote_table(self.ticker)
@@ -72,21 +72,28 @@ def connect():
     logging.info('Someone connect to socket, session id:', request.sid)
 
 
-@io.on('disconnect')
-def disconnect():
-    global THREAD_POOL
-    if request.sid in THREAD_POOL:
-        thread = THREAD_POOL.pop(request.sid)
-        thread.join()
-
-
 @io.on('get-live-quote')
 def get_live_quote(ticker):
-    global THREAD_POOL
+    global THREAD_POOL, SESSION_TO_TICKER
+
     session_id = request.sid
-    thread = LiveQuoteThread(ticker, session_id)
-    THREAD_POOL[session_id] = thread
-    thread.start()
+    SESSION_TO_TICKER[session_id] = ticker
+
+    if ticker not in THREAD_POOL:
+        thread = LiveQuoteThread(ticker)
+        THREAD_POOL[ticker] = thread
+        thread.start()
+
+
+@io.on('disconnect')
+def disconnect():
+    global THREAD_POOL, SESSION_TO_TICKER
+
+    if request.sid in SESSION_TO_TICKER:
+        ticker = SESSION_TO_TICKER.pop(request.sid)
+        if ticker not in SESSION_TO_TICKER.values():
+            thread = THREAD_POOL.pop(ticker)
+            thread.join()
 
 
 if __name__ == '__main__':

@@ -8,3 +8,4 @@ pandas
 lxml
 gevent-websocket
 html5lib
+requests_html
