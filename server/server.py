@@ -19,7 +19,7 @@ THREAD_POOL = {}
 
 class LiveQuoteThread(Thread):
 
-    def __init__(self, ticker, session_id, pause=10):
+    def __init__(self, ticker, session_id, pause=1):
         super().__init__()
         self.ticker = ticker
         self.session_id = session_id
@@ -36,7 +36,7 @@ class LiveQuoteThread(Thread):
             try:
                 quote = si.get_quote_table(self.ticker)
                 data = self._parse_yahoo_quote(quote)
-                io.emit('live-quote-response', json.dumps(data))
+                io.emit('live-quote-{}'.format(self.ticker), json.dumps(data))
             finally:
                 time.sleep(self.pause)
 

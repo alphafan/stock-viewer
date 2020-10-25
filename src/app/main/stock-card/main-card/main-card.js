@@ -17,7 +17,7 @@ const MainCard = ({ ticker, symbol, handleSettingsIconClicked }) => {
       setSocket(io.connect(`${SERVER_ROOT_URL}`), { reconnection: false });
     } else {
       socket.emit('get-live-quote', ticker);
-      socket.on('live-quote-response', response => {
+      socket.on(`live-quote-${ticker}`, response => {
         setQuote(JSON.parse(response));
         setSocketIsLoading(false);
       });
