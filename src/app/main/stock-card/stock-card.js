@@ -38,7 +38,6 @@ const StockCard = ({ card: { cardId }, removeCard }) => {
           <MainCard
             ticker={ticker}
             symbol={symbol}
-            handleRemoveCard={handleRemoveCard}
             handleSettingsIconClicked={handleSettingsIconClicked}
           />
         }
