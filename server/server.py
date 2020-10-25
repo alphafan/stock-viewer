@@ -48,7 +48,7 @@ class LiveQuoteThread(Thread):
             'ask': round(float(quote['Ask'].split(' x ')[0]), 3),
             'open': round(quote['Open'], 3),
             'prevClose': round(quote['Previous Close'], 3),
-            'change': round(quote['Quote Price'] - quote['Previous Close'], 3),
+            'change': round(quote['Quote Price']-quote['Previous Close'], 3),
             'changePercentage': round((quote['Quote Price']-quote['Previous Close'])/quote['Previous Close'] * 100, 3),
             'low': round(float(quote['Day\'s Range'].split(' - ')[0]), 3),
             'high': round(float(quote['Day\'s Range'].split(' - ')[1]), 3),
@@ -75,8 +75,9 @@ def connect():
 @io.on('disconnect')
 def disconnect():
     global THREAD_POOL
-    thread = THREAD_POOL.pop(request.sid)
-    thread.join()
+    if request.sid in THREAD_POOL:
+        thread = THREAD_POOL.pop(request.sid)
+        thread.join()
 
 
 @io.on('get-live-quote')
