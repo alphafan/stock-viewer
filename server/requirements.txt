@@ -1,11 +1,4 @@
 flask>=1.1.2
 flask_cors
 flask_socketio
-gevent
 yahoo_fin
-requests
-pandas
-lxml
-gevent-websocket
-html5lib
-requests_html

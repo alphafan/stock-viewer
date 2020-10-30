@@ -7,6 +7,8 @@ import { MDBCardTitle } from 'mdbreact';
 
 import style from './style.module.css';
 
+const colorClass = (a, b) => a > b ? style.green : a < b ? style.red : '';
+
 const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => {
   const { marketStatus, price, prevClose, open, high, low, change, changePercentage } = quote;
   return (
@@ -18,7 +20,7 @@ const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => 
               <b>{`${ticker} ${symbol}`}</b>
               {
                 price !== undefined &&
-                <b className={price > prevClose ? style.green : price < prevClose ? style.red : ''}>
+                <b className={colorClass(price, prevClose)}>
                   {price.toFixed(3)} <FontAwesomeIcon icon={price >= prevClose ? faLongArrowAltUp : faLongArrowAltDown} />
                 </b>
               }
@@ -27,7 +29,7 @@ const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => 
               <span className={style.grey}>High:</span>
               {
                 high !== undefined &&
-                <b className={high > prevClose ? style.green : high < prevClose ? style.red : ''}>
+                <b className={colorClass(high, prevClose)}>
                   {high.toFixed(3)}
                 </b>
               }
@@ -36,7 +38,7 @@ const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => 
               <span className={style.grey}>Open:</span>
               {
                 open !== undefined &&
-                <b className={open > prevClose ? style.green : open < prevClose ? style.red : ''}>
+                <b className={colorClass(open, prevClose)}>
                   {open.toFixed(3)}
                 </b>
               }
@@ -47,7 +49,7 @@ const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => 
               <span className={style.grey}>{marketStatus}</span>
               {
                 change !== undefined &&
-                <span className={price > prevClose ? style.green : price < prevClose ? style.red : ''}>
+                <span className={colorClass(change, 0)}>
                   {price >= prevClose ? '+' : ''} {change.toFixed(3)} {price >= prevClose ? '+' : ''} {changePercentage.toFixed(2)} %
             </span>
               }
@@ -56,13 +58,13 @@ const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => 
               <span className={style.grey}>Low:</span>
               {
                 low !== undefined &&
-                <b className={low > prevClose ? style.green : low < prevClose ? style.red : ''}>
+                <b className={colorClass(low, prevClose)}>
                   {low.toFixed(3)}
                 </b>
               }
             </td>
             <td>
-              <span className={style.grey}>Prev Close:</span>
+              <span className={style.grey}>P. Close:</span>
               {
                 prevClose !== undefined &&
                 <b>
