@@ -8,6 +8,8 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 from yahoo_fin import stock_info as si
 
+import yfinance as yf
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 CORS(app)
@@ -35,27 +37,43 @@ class LiveQuoteThread(Thread):
                 raise SystemExit
             try:
                 quote = si.get_quote_table(self.ticker)
-                data = self._parse_yahoo_quote(quote)
+                minutes = yf.download(self.ticker, period='1d', interval='1m')
+                data = self._parse_yahoo_quote(quote, minutes)
                 io.emit('live-quote-{}'.format(self.ticker), json.dumps(data))
             finally:
                 time.sleep(self.pause)
 
-    @staticmethod
-    def _parse_yahoo_quote(quote):
-        return {
-            'price': round(quote['Quote Price'], 3),
-            'bid': round(float(quote['Bid'].split(' x ')[0]), 3),
-            'ask': round(float(quote['Ask'].split(' x ')[0]), 3),
-            'open': round(quote['Open'], 3),
-            'prevClose': round(quote['Previous Close'], 3),
-            'change': round(quote['Quote Price']-quote['Previous Close'], 3),
-            'changePercentage': round((quote['Quote Price']-quote['Previous Close'])/quote['Previous Close'] * 100, 3),
-            'low': round(float(quote['Day\'s Range'].split(' - ')[0]), 3),
-            'high': round(float(quote['Day\'s Range'].split(' - ')[1]), 3),
-            'bidVolume': round(float(quote['Bid'].split(' x ')[1]), 3),
-            'askVolume': round(float(quote['Ask'].split(' x ')[1]), 3),
-            'marketStatus': 'Market Close'
+    def _parse_yahoo_quote(self, quote, minutes):
+        price = round(list(minutes['Close'])[-1], 3)
+        open = self._parse_float(quote['Open'])
+        prev_close = self._parse_float(quote['Previous Close'])
+        high = max(self._parse_float(quote['Day\'s Range'].split(' - ')[1]), price)
+        low = min(self._parse_float(quote['Day\'s Range'].split(' - ')[0]), price)
+        volume = self._parse_float(minutes['Volume'].sum())
+        change = price - prev_close
+        change_percentage = self._parse_float(change / prev_close, 2)
+        market_status = 'Market Close'
+        last_update = str(list(minutes.index)[-1])
+        data = {
+            'price': price,
+            'open': open,
+            'low': low,
+            'high': high,
+            'prevClose': prev_close,
+            'change': change,
+            'changePercentage': change_percentage,
+            'volume': str(volume),
+            'marketStatus': market_status,
+            'lastUpdate': last_update
         }
+        print(data)
+        return data
+
+    @staticmethod
+    def _parse_float(value, precision=3):
+        if isinstance(value, str):
+            return round(float(value.replace(',', '')), precision)
+        return round(value, precision)
 
 
 @app.route('/api/get_tickers')
@@ -63,6 +81,7 @@ def get_tickers():
     data = [
         {'label': 'Xiaomi Corp', 'value': '1810.HK'},
         {'label': 'MicroPort Corp', 'value': '0853.HK'},
+        {'label': 'Tesla, Inc. ', 'value': 'TSLA'},
     ]
     return jsonify(data)
 

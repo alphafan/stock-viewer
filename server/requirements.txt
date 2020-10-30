@@ -2,3 +2,4 @@ flask>=1.1.2
 flask_cors
 flask_socketio
 yahoo_fin
+yfinance

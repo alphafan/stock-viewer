@@ -10,7 +10,7 @@ import style from './style.module.css';
 const colorClass = (a, b) => a > b ? style.green : a < b ? style.red : '';
 
 const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => {
-  const { marketStatus, price, prevClose, open, high, low, change, changePercentage } = quote;
+  const { price, marketStatus, lastUpdate, prevClose, open, high, low, change, changePercentage } = quote;
   return (
     <MDBCardTitle className={style.title}>
       <table>
@@ -46,7 +46,10 @@ const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => 
           </tr>
           <tr>
             <td className={style.smaller}>
-              <span className={style.grey}>{marketStatus}</span>
+            <span className={style.grey}>
+              {marketStatus} 
+              Update at {lastUpdate && (new Date(lastUpdate)).toLocaleTimeString()}
+              </span>
               {
                 change !== undefined &&
                 <span className={colorClass(change, 0)}>
