@@ -13,7 +13,7 @@ table tbody tr td:first-child {
 }
 
 table tbody tr td:nth-child(2) {
-  min-width: 95px;
+  min-width: 100px;
   padding-right: 15px;
 }
 
@@ -26,7 +26,8 @@ table tbody tr td:nth-child(2) b {
 }
 
 table tbody tr td:nth-child(3) {
-  min-width: 120px;
+  min-width: 125px;
+  padding-right: 15px;
 }
 
 table tbody tr td:nth-child(3) span {
@@ -34,6 +35,18 @@ table tbody tr td:nth-child(3) span {
 }
 
 table tbody tr td:nth-child(3) b {
+  float: right;
+}
+
+table tbody tr td:nth-child(4) {
+  min-width: 70px;
+}
+
+table tbody tr td:nth-child(4) span {
+  float: left;
+}
+
+table tbody tr td:nth-child(4) b {
   float: right;
 }
 

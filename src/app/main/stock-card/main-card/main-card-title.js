@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactTooltip from 'react-tooltip';
+import FlashChange from '@avinlab/react-flash-change';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog, faLongArrowAltUp, faLongArrowAltDown } from '@fortawesome/free-solid-svg-icons';
@@ -10,7 +11,8 @@ import style from './style.module.css';
 const colorClass = (a, b) => a > b ? style.green : a < b ? style.red : '';
 
 const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => {
-  const { price, marketStatus, lastUpdate, prevClose, open, high, low, change, changePercentage } = quote;
+  const { price, prevClose, open, high, low, volume,
+    marketStatus, lastUpdate, change, changePercentage } = quote;
   return (
     <MDBCardTitle className={style.title}>
       <table>
@@ -20,9 +22,18 @@ const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => 
               <b>{`${ticker} ${symbol}`}</b>
               {
                 price !== undefined &&
-                <b className={colorClass(price, prevClose)}>
-                  {price.toFixed(3)} <FontAwesomeIcon icon={price >= prevClose ? faLongArrowAltUp : faLongArrowAltDown} />
-                </b>
+                <FlashChange
+                  value={price}
+                  flashClassName='flashing'
+                  compare={(prevProps, nextProps) => {
+                    return prevProps.quote && nextProps.quote &&
+                      nextProps.quote.price !== prevProps.quote.price;
+                  }}
+                >
+                  <b className={colorClass(price, prevClose)}>
+                    {price.toFixed(3)} <FontAwesomeIcon icon={price >= prevClose ? faLongArrowAltUp : faLongArrowAltDown} />
+                  </b>
+                </FlashChange>
               }
             </td>
             <td>
@@ -46,8 +57,8 @@ const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => 
           </tr>
           <tr>
             <td className={style.smaller}>
-            <span className={style.grey}>
-              {marketStatus} 
+              <span className={style.grey}>
+                {marketStatus}
               Update at {lastUpdate && (new Date(lastUpdate)).toLocaleTimeString()}
               </span>
               {
@@ -72,6 +83,15 @@ const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => 
                 prevClose !== undefined &&
                 <b>
                   {prevClose.toFixed(3)}
+                </b>
+              }
+            </td>
+            <td>
+              <span className={style.grey}>Vol. :</span>
+              {
+                volume !== undefined &&
+                <b>
+                  {volume}
                 </b>
               }
             </td>

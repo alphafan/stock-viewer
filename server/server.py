@@ -7,7 +7,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from yahoo_fin import stock_info as si
-
+import math
 import yfinance as yf
 
 app = Flask(__name__)
@@ -21,6 +21,7 @@ SESSION_TO_TICKER = {}
 
 
 class LiveQuoteThread(Thread):
+    millnames = ['', 'k', ' m', ' b', ' t']
 
     def __init__(self, ticker, pause=1):
         super().__init__()
@@ -49,9 +50,9 @@ class LiveQuoteThread(Thread):
         prev_close = self._parse_float(quote['Previous Close'])
         high = max(self._parse_float(quote['Day\'s Range'].split(' - ')[1]), price)
         low = min(self._parse_float(quote['Day\'s Range'].split(' - ')[0]), price)
-        volume = self._parse_float(minutes['Volume'].sum())
+        volume = self._millify(minutes['Volume'].sum())
         change = price - prev_close
-        change_percentage = self._parse_float(change / prev_close, 2)
+        change_percentage = self._parse_float(change / prev_close * 100, 2)
         market_status = 'Market Close'
         last_update = str(list(minutes.index)[-1])
         data = {
@@ -74,6 +75,13 @@ class LiveQuoteThread(Thread):
         if isinstance(value, str):
             return round(float(value.replace(',', '')), precision)
         return round(value, precision)
+
+    def _millify(self, n):
+        n = float(n)
+        millidx = max(0, min(len(self.millnames) - 1,
+                             int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
+
+        return '{:.2f}{}'.format(n / 10 ** (3 * millidx), self.millnames[millidx])
 
 
 @app.route('/api/get_tickers')
@@ -103,6 +111,9 @@ def get_live_quote(ticker):
         THREAD_POOL[ticker] = thread
         thread.start()
 
+    print('Current THREAD_POOL', THREAD_POOL)
+    print('Current SESSION_TO_TICKER', SESSION_TO_TICKER)
+
 
 @io.on('disconnect')
 def disconnect():
@@ -113,6 +124,9 @@ def disconnect():
         if ticker not in SESSION_TO_TICKER.values():
             thread = THREAD_POOL.pop(ticker)
             thread.join()
+
+    print('Current THREAD_POOL', THREAD_POOL)
+    print('Current SESSION_TO_TICKER', SESSION_TO_TICKER)
 
 
 if __name__ == '__main__':
