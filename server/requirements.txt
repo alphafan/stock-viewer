@@ -3,3 +3,4 @@ flask_cors
 flask_socketio
 yahoo_fin
 yfinance
+pandas

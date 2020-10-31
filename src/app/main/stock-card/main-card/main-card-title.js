@@ -58,8 +58,7 @@ const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => 
           <tr>
             <td className={style.smaller}>
               <span className={style.grey}>
-                {marketStatus}
-              Update at {lastUpdate && (new Date(lastUpdate)).toLocaleTimeString()}
+                {`${marketStatus} ${lastUpdate && (new Date(lastUpdate)).toLocaleTimeString()}`}
               </span>
               {
                 change !== undefined &&

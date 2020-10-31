@@ -16,13 +16,13 @@ const MainCard = ({ ticker, symbol, handleSettingsIconClicked }) => {
       setSocketIsLoading(true);
       setSocket(io.connect(`${SERVER_ROOT_URL}`), { reconnection: false });
     } else {
-      socket.emit('get-live-quote', ticker);
-      socket.on(`live-quote-${ticker}`, response => {
+      socket.emit('get-live-data', ticker);
+      socket.on(`live-data-${ticker}`, response => {
         setQuote(JSON.parse(response));
         setSocketIsLoading(false);
       });
       return () => {
-        socket.close();
+        socket.disconnect();
         setSocket(null);
       };
     }

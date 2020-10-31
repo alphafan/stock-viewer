@@ -11,3 +11,5 @@ LABEL_AND_VALUES = [
      'value': symbol}
     for symbol, ticker in sorted(TICKERS.items())
 ]
+
+MILL_NAMES = ['', 'k', ' m', ' b', ' t']
