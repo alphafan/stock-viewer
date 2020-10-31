@@ -11,6 +11,7 @@ from yahoo_fin import stock_info as si
 
 from constants import MILL_NAMES
 from webapp import app
+import traceback
 
 io = SocketIO(app, cors_allowed_origins="*")
 
@@ -20,7 +21,7 @@ _sessions = dict()  # session id to symbols
 
 class LiveDataThread(Thread):
 
-    def __init__(self, symbol, pause=1):
+    def __init__(self, symbol, pause=10):
         super().__init__()
         self.symbol = symbol
         self.pause = pause
@@ -36,12 +37,20 @@ class LiveDataThread(Thread):
             self.lock.release()
             try:
                 minutes, quotes = self.download_live_data()
+                # emit quote data
                 quote_data = self.get_quote_data(minutes, quotes)
-                self.emit_quote_data(self.symbol, quote_data)
+                self.emit_quote_data(quote_data)
+                # emit intraday data
+                intraday_data = self.get_intraday_data(minutes)
+                self.emit_intraday_data(intraday_data)
             except:
-                print('Error fetching data for {}'.format(self.symbol))
+                print('Emitting data error \n{}'.format(traceback.format_exc()))
             finally:
                 time.sleep(self.pause)
+
+    # ----------------------------------------------------------------------------
+    # Download live data
+    # ----------------------------------------------------------------------------
 
     def download_live_data(self):
         minutes = yf.download(
@@ -55,12 +64,9 @@ class LiveDataThread(Thread):
         )
         return minutes, quotes
 
-    @staticmethod
-    def emit_quote_data(symbol, data):
-        if all(not pd.isnull(val) and not pd.isna(val) for val in data.values()):
-            print('emitting {}'.format(data))
-            data = json.dumps(data)
-            io.emit('quote-data-{}'.format(symbol), data)
+    # ----------------------------------------------------------------------------
+    # Emit live quote data
+    # ----------------------------------------------------------------------------
 
     def get_quote_data(self, minutes, quotes):
         price = round(list(minutes['Close'])[-1], 3)
@@ -86,6 +92,39 @@ class LiveDataThread(Thread):
             'lastUpdate': last_update
         }
         return data
+
+    def emit_quote_data(self, data):
+        if all(not pd.isnull(val) and not pd.isna(val) for val in data.values()):
+            print('emitting quote data {}'.format(data))
+            data = json.dumps(data)
+            io.emit('quote-data-{}'.format(self.symbol), data)
+
+    # ----------------------------------------------------------------------------
+    # Emit live quote data
+    # ----------------------------------------------------------------------------
+
+    def get_intraday_data(self, minutes):
+        columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+        minutes = minutes[columns]
+        for col in columns:
+            minutes[col] = [self._parse_float(val) for val in list(minutes[col])]
+        minutes = minutes.reset_index()
+        columns = {col: col.lower() for col in columns}
+        columns['Datetime'] = 'date'
+        minutes = minutes.rename(columns=columns)
+        minutes['date'] = [str(val) for val in minutes['date']]
+        return [row for row in minutes.T.to_dict().values()]
+
+    def emit_intraday_data(self, data):
+        if all(not pd.isnull(val) and not pd.isna(val)
+               for row in data for val in row.values()):
+            print('emitting intraday data {}'.format(self.symbol))
+            data = json.dumps(data)
+            io.emit('intraday-data-{}'.format(self.symbol), data)
+
+    # ----------------------------------------------------------------------------
+    # Utility functions
+    # ----------------------------------------------------------------------------
 
     @staticmethod
     def _parse_float(value, precision=3):
