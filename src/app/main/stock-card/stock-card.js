@@ -9,13 +9,13 @@ import style from './style.module.css';
 
 const StockCard = ({ card: { cardId }, removeCard }) => {
 
-  const [ticker, setTicker] = useState();
+  const [name, setName] = useState();
   const [symbol, setSymbol] = useState();
   const [pageId, setPageId] = useState('Settings');
 
   const handleSelectTicker = opt => {
-    setTicker(opt.value);
-    setSymbol(opt.label);
+    setName(opt.label);
+    setSymbol(opt.value);
     setPageId('Main');
   };
   const handleSettingsIconClicked = () => {
@@ -30,13 +30,13 @@ const StockCard = ({ card: { cardId }, removeCard }) => {
       <MDBCardBody className={style.body}>
         {pageId === 'Settings' ?
           <Settings
-            ticker={ticker}
+            symbol={symbol}
             handleSelectTicker={handleSelectTicker}
             handleRemoveCard={handleRemoveCard}
           />
           :
           <MainCard
-            ticker={ticker}
+            name={name}
             symbol={symbol}
             handleSettingsIconClicked={handleSettingsIconClicked}
           />

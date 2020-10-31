@@ -5,32 +5,34 @@ import MainCardTitle from './main-card-title';
 import { SERVER_ROOT_URL } from '../../../../common/constants';
 import Loading from '../../../../common/components/loading';
 
-const MainCard = ({ ticker, symbol, handleSettingsIconClicked }) => {
+const MainCard = ({ symbol, name, handleSettingsIconClicked }) => {
 
-  const [quote, setQuote] = useState({});
   const [socket, setSocket] = useState(null);
-  const [socketIsLoading, setSocketIsLoading] = useState(false);
+  const [quote, setQuote] = useState({});
+  const [quoteIsLoading, setQuoteIsLoading] = useState(false);
 
   const fetchLiveQuote = () => {
     if (!socket) {
-      setSocketIsLoading(true);
+      setQuoteIsLoading(true);
       setSocket(io.connect(`${SERVER_ROOT_URL}`), { reconnection: false });
     } else {
-      socket.emit('get-live-data', ticker);
-      socket.on(`live-data-${ticker}`, response => {
+      socket.emit('get-live-data', symbol);
+      socket.on(`quote-data-${symbol}`, response => {
         setQuote(JSON.parse(response));
-        setSocketIsLoading(false);
+        setQuoteIsLoading(false);
       });
       return () => {
-        socket.disconnect();
-        setSocket(null);
+        if (socket) {
+          socket.disconnect();
+          setSocket(null);
+        }
       };
     }
   };
 
-  useEffect(fetchLiveQuote, [socket, ticker]);
+  useEffect(fetchLiveQuote, [socket, symbol]);
 
-  if (socketIsLoading) {
+  if (quoteIsLoading) {
     return (
       <Loading />
     );
@@ -38,8 +40,8 @@ const MainCard = ({ ticker, symbol, handleSettingsIconClicked }) => {
     return (
       <>
         <MainCardTitle
-          ticker={ticker}
           symbol={symbol}
+          name={name}
           quote={quote}
           handleSettingsIconClicked={handleSettingsIconClicked}
         />

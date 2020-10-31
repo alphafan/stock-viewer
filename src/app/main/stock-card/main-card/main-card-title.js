@@ -10,7 +10,7 @@ import style from './style.module.css';
 
 const colorClass = (a, b) => a > b ? style.green : a < b ? style.red : '';
 
-const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => {
+const MainCardTitle = ({ name, symbol, quote, handleSettingsIconClicked }) => {
   const { price, prevClose, open, high, low, volume,
     marketStatus, lastUpdate, change, changePercentage } = quote;
   return (
@@ -19,7 +19,7 @@ const MainCardTitle = ({ ticker, symbol, quote, handleSettingsIconClicked }) => 
         <tbody>
           <tr>
             <td className={style.larger}>
-              <b>{`${ticker} ${symbol}`}</b>
+              <b>{`${symbol} ${name}`}</b>
               {
                 price !== undefined &&
                 <FlashChange

@@ -12,7 +12,7 @@ import { SERVER_ROOT_URL } from '../../../../common/constants';
 import LoadError from '../../../../common/components/load-error';
 import Loading from '../../../../common/components/loading';
 
-const SelectTicker = ({ ticker, tickers, handleSelectTicker, handleRemoveCard }) => (
+const SelectTicker = ({ value, options, handleSelectTicker, handleRemoveCard }) => (
   <>
     <MDBCardTitle className={style.title}>
       Select a stock...
@@ -27,15 +27,15 @@ const SelectTicker = ({ ticker, tickers, handleSelectTicker, handleRemoveCard })
     <hr />
     <Select
       isClearable
-      value={ticker}
-      options={tickers}
+      value={value}
+      options={options}
       onChange={handleSelectTicker}
       className='my-4'
     />
   </>
 );
 
-const Settings = ({ ticker, handleRemoveCard, handleSelectTicker }) => {
+const Settings = ({ symbol, handleRemoveCard, handleSelectTicker }) => {
 
   const [tickers, setTickers] = useState([]);
   const [tickersIsLoading, setTickersIsLoading] = useState(false);
@@ -70,8 +70,8 @@ const Settings = ({ ticker, handleRemoveCard, handleSelectTicker }) => {
   } else {
     return (
       <SelectTicker
-        ticker={ticker}
-        tickers={tickers}
+        value={symbol}
+        options={tickers}
         handleSelectTicker={handleSelectTicker}
         handleRemoveCard={handleRemoveCard}
       />

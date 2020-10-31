@@ -36,7 +36,7 @@ class LiveDataThread(Thread):
             self.lock.release()
             try:
                 minutes, quotes = self.download_live_data()
-                self.emit_data(self.symbol, minutes, quotes)
+                self.emit_quote_data(self.symbol, minutes, quotes)
             except:
                 print('Error fetching data for {}'.format(self.symbol))
             finally:
@@ -54,12 +54,12 @@ class LiveDataThread(Thread):
         )
         return minutes, quotes
 
-    def emit_data(self, symbol, minutes, quotes):
+    def emit_quote_data(self, symbol, minutes, quotes):
         data = self.get_quote_data(minutes, quotes)
         if all(not pd.isnull(val) and not pd.isna(val) for val in data.values()):
             print('emitting {}'.format(data))
             data = json.dumps(data)
-            io.emit('live-data-{}'.format(symbol), data)
+            io.emit('quote-data-{}'.format(symbol), data)
 
     def get_quote_data(self, minutes, quotes):
         price = round(list(minutes['Close'])[-1], 3)
