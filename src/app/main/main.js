@@ -10,11 +10,11 @@ const Main = ({ cards }) => (
   <Container fluid>
     <Row>
       {cards.map(card =>
-        <Col xl={6} key={card.cardId} >
+        <Col xs={6} key={card.cardId} >
           <StockCard card={card} />
         </Col>
       )}
-      <Col xl={6}>
+      <Col xs={6}>
         <AddCard />
       </Col>
     </Row>
