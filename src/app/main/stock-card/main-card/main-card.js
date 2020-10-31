@@ -1,60 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
+import React from 'react';
 
 import MainCardTitle from './main-card-title';
-import { SERVER_ROOT_URL } from '../../../../common/constants';
-import Loading from '../../../../common/components/loading';
+import MainCardBody from './main-card-body';
 
-const MainCard = ({ symbol, name, handleSettingsIconClicked }) => {
-
-  const [socket, setSocket] = useState(null);
-  const [quote, setQuote] = useState({});
-  const [quoteIsLoading, setQuoteIsLoading] = useState(false);
-  const [intradayData, setIntradayData] = useState([]);
-  const [intradayDataIsLoading, setIntradayDataIsLoading] = useState(false);
-
-  const fetchLiveData = () => {
-    if (!socket) {
-      setQuoteIsLoading(true);
-      setSocket(io.connect(`${SERVER_ROOT_URL}`), { reconnection: false });
-    } else {
-      socket.emit('get-live-data', symbol);
-      socket.on(`quote-data-${symbol}`, response => {
-        setQuote(JSON.parse(response));
-        setQuoteIsLoading(false);
-      });
-      socket.on(`intraday-data-${symbol}`, response => {
-        setIntradayData(JSON.parse(response));
-        setIntradayDataIsLoading(false);
-      });
-      return () => {
-        if (socket) {
-          socket.disconnect();
-          setSocket(null);
-        }
-      };
-    }
-  };
-
-  useEffect(fetchLiveData, [socket, symbol]);
-
-  if (quoteIsLoading) {
-    return (
-      <Loading />
-    );
-  } else {
-    return (
-      <>
-        <MainCardTitle
-          symbol={symbol}
-          name={name}
-          quote={quote}
-          handleSettingsIconClicked={handleSettingsIconClicked}
-        />
-        <hr />
-      </>
-    );
-  }
-}
+const MainCard = ({ symbol, name, handleSettingsIconClicked }) => (
+  <>
+    <MainCardTitle
+      symbol={symbol}
+      name={name}
+      handleSettingsIconClicked={handleSettingsIconClicked}
+    />
+    <hr />
+    <MainCardBody 
+      symbol={symbol}
+    />
+  </>
+);
 
 export default MainCard;
