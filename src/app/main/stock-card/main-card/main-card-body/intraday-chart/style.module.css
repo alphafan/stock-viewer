@@ -1,0 +1,31 @@
+.controller {
+  padding-top: 8px;
+  font-family: 'Lucida Grande', 'Lucida Sans Unicode', Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  min-height: 22px;
+  color: #666666;
+}
+
+.label {
+  margin-left: 10px;
+  margin-right: 6px;
+}
+
+.disabled {
+  color: #cccccc;
+  cursor: pointer;
+  font-weight: normal;
+  background-color: #fafafa;
+  margin: 3px;
+  padding: 5px;
+}
+
+.active {
+  font-weight: bold;
+  color: #000000;
+  cursor: pointer;
+  font-weight: normal;
+  background-color:#eeede0;
+  margin: 3px;
+  padding: 5px;
+}

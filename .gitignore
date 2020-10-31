@@ -25,5 +25,5 @@ yarn-error.log*
 # python
 server/venv
 server/.idea
-__pycache__/
+server/__pycache__/*
 *.py[cod]
