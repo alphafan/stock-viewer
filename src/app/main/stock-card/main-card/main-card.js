@@ -10,8 +10,10 @@ const MainCard = ({ symbol, name, handleSettingsIconClicked }) => {
   const [socket, setSocket] = useState(null);
   const [quote, setQuote] = useState({});
   const [quoteIsLoading, setQuoteIsLoading] = useState(false);
+  const [intradayData, setIntradayData] = useState([]);
+  const [intradayDataIsLoading, setIntradayDataIsLoading] = useState(false);
 
-  const fetchLiveQuote = () => {
+  const fetchLiveData = () => {
     if (!socket) {
       setQuoteIsLoading(true);
       setSocket(io.connect(`${SERVER_ROOT_URL}`), { reconnection: false });
@@ -20,6 +22,10 @@ const MainCard = ({ symbol, name, handleSettingsIconClicked }) => {
       socket.on(`quote-data-${symbol}`, response => {
         setQuote(JSON.parse(response));
         setQuoteIsLoading(false);
+      });
+      socket.on(`intraday-data-${symbol}`, response => {
+        setIntradayData(JSON.parse(response));
+        setIntradayDataIsLoading(false);
       });
       return () => {
         if (socket) {
@@ -30,7 +36,7 @@ const MainCard = ({ symbol, name, handleSettingsIconClicked }) => {
     }
   };
 
-  useEffect(fetchLiveQuote, [socket, symbol]);
+  useEffect(fetchLiveData, [socket, symbol]);
 
   if (quoteIsLoading) {
     return (
