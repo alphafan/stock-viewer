@@ -76,8 +76,6 @@ const IntradayChart = ({ symbol }) => {
     );
   }
 
-  console.log(intradayData);
-
   return (
     <>
       <Controller

@@ -99,7 +99,6 @@ class LiveDataThread(Thread):
     def emit_quote_data(self, data):
         if all(not pd.isnull(val) and not pd.isna(val) for val in data.values()):
             print('emitting quote data {}'.format(data))
-            print(data)
             data = json.dumps(data)
             io.emit('quote-data-{}'.format(self.symbol), data)
 
@@ -115,7 +114,6 @@ class LiveDataThread(Thread):
         minutes['date'] = [self._utc_datetime_str(val) for val in list(minutes.index)]
         columns = {col: col.lower() for col in columns}
         minutes = minutes.rename(columns=columns)
-        print(minutes)
         return [row for row in minutes.T.to_dict().values()]
 
     def emit_intraday_data(self, data):

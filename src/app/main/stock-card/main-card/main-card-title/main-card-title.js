@@ -62,8 +62,6 @@ const MainCardTitle = ({ name, symbol, handleSettingsIconClicked }) => {
   const { price, prevClose, open, high, low, volume,
     marketStatus, lastUpdate, change, changePercentage } = quote;
 
-  console.log(lastUpdate)
-
   if (quoteIsLoading) {
     return (
       <MDBCardTitle style={{ height: '35px' }}>
