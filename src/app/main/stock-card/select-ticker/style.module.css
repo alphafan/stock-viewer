@@ -9,3 +9,9 @@
   cursor: pointer;
   color: #8a8a8a;
 }
+
+.text {
+  font-family: 'Archer SSm A', 'Archer SSm B', Georgia, serif;
+  font-style: italic;
+  font-size: 1.2rem!important;
+}

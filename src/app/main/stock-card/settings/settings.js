@@ -1,82 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import Select from 'react-select';
+import React from 'react';
 import ReactTooltip from 'react-tooltip';
 
-import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { MDBCardTitle } from 'mdbreact';
 
 import style from './style.module.css';
-import { SERVER_ROOT_URL } from '../../../../common/constants';
-import LoadError from '../../../../common/components/load-error';
-import Loading from '../../../../common/components/loading';
 
-const SelectTicker = ({ value, options, handleSelectTicker, handleRemoveCard }) => (
-  <>
-    <MDBCardTitle className={style.title}>
-      Select a stock...
-      <FontAwesomeIcon
-        icon={faTimes}
-        className={style.icon}
-        data-tip='Remove Card'
-        onClick={handleRemoveCard}
-      />
-      <ReactTooltip effect='solid' />
-    </MDBCardTitle>
-    <hr />
-    <Select
-      isClearable
-      value={value}
-      options={options}
-      onChange={handleSelectTicker}
-      className='my-4'
-    />
-  </>
-);
-
-const Settings = ({ symbol, handleRemoveCard, handleSelectTicker }) => {
-
-  const [tickers, setTickers] = useState([]);
-  const [tickersIsLoading, setTickersIsLoading] = useState(false);
-  const [tickersLoadError, setTickersLoadError] = useState(false);
-
-  const fetchData = () => {
-    setTickersIsLoading(true);
-    setTickersLoadError(false);
-    axios
-      .get(`${SERVER_ROOT_URL}/api/get_tickers`)
-      .then(response => {
-        setTickers(response.data);
-        setTickersIsLoading(false);
-      }, () => {
-        setTickersIsLoading(false);
-        setTickersLoadError(true);
-      })
-  }
-  useEffect(fetchData, []);
-
-  if (tickersLoadError) {
-    return (
-      <LoadError
-        fetchData={fetchData}
-        handleRemoveCard={handleRemoveCard}
-      />
-    );
-  } else if (tickersIsLoading) {
-    return (
-      <Loading />
-    );
-  } else {
-    return (
-      <SelectTicker
-        value={symbol}
-        options={tickers}
-        handleSelectTicker={handleSelectTicker}
-        handleRemoveCard={handleRemoveCard}
-      />
-    );
-  }
+const Settings = ({ handleRemoveCard, handleBackToMainIconClicker }) => {
+  return (
+    <>
+      <MDBCardTitle className={style.title}>
+        Settings
+        <div>
+          <FontAwesomeIcon
+            icon={faChevronLeft}
+            className={style.icon}
+            data-tip='Back To Main'
+            onClick={handleBackToMainIconClicker}
+            style={{marginRight: '10px'}}
+          />
+          <FontAwesomeIcon
+            icon={faTimes}
+            className={style.icon}
+            data-tip='Remove Card'
+            onClick={handleRemoveCard}
+          />
+        </div>
+        <ReactTooltip effect='solid' />
+      </MDBCardTitle>
+      <hr />
+    </>
+  )
 };
 
 export default Settings;

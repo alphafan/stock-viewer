@@ -80,7 +80,7 @@ class LiveDataThread(Thread):
         volume = self._millify(minutes['Volume'].sum())
         change = price - prev_close
         change_percentage = self._parse_float(change / prev_close * 100, 2)
-        market_status = 'Market Close'
+        market_status = 'M. Close'
         last_update = self._utc_datetime_str(list(minutes.index)[-1])
         data = {
             'price': price,

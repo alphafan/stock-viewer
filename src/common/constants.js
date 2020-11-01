@@ -6,5 +6,6 @@ export const MAX_CARDS = 4;
 
 export const GROUPING_UNITS = [1, 3, 5, 15, 30];
 
-export const WS_DATA_ERRORS = ['error'];
-export const WS_CONN_ERRORS = ['connect_error', 'connect_timeout', 'disconnect', 'reconnect_error', 'reconnect_failed'];
+export const SELECT_TICKER_PAGE = 'SELECT_TICKER_PAGE';
+export const MAIN_CARD_PAGE = 'MAIN_CARD_PAGE';
+export const SETTINGS_PAGE = 'SETTINGS_PAGE';
