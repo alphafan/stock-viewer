@@ -20,7 +20,8 @@ export const chartOptions = (symbol, data, groupUnit) => ({
       name: symbol,
       data: data.map(
         ({ date, open, high, low, close }) => [
-          (new Date(date)).getTime(), open, high, low, close
+          Date.parse(date) - (new Date()).getTimezoneOffset() * 1000 * 60, 
+          open, high, low, close
         ]
       ),
       dataGrouping: {

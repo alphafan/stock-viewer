@@ -1,19 +1,20 @@
+import datetime
 import json
 import math
 import time
+import traceback
 from threading import Thread, Lock
-import datetime
 
 import pandas as pd
+import pytz
 import yfinance as yf
+from dateutil.parser import parse
 from flask import request
 from flask_socketio import SocketIO
 from yahoo_fin import stock_info as si
 
 from constants import MILL_NAMES
 from webapp import app
-import traceback
-from dateutil.parser import parse
 
 io = SocketIO(app, cors_allowed_origins="*")
 
@@ -80,7 +81,7 @@ class LiveDataThread(Thread):
         change = price - prev_close
         change_percentage = self._parse_float(change / prev_close * 100, 2)
         market_status = 'Market Close'
-        last_update = self._unix_time_millis(parse(str(list(minutes.index)[-1])))
+        last_update = self._utc_datetime_str(list(minutes.index)[-1])
         data = {
             'price': price,
             'open': open,
@@ -98,6 +99,7 @@ class LiveDataThread(Thread):
     def emit_quote_data(self, data):
         if all(not pd.isnull(val) and not pd.isna(val) for val in data.values()):
             print('emitting quote data {}'.format(data))
+            print(data)
             data = json.dumps(data)
             io.emit('quote-data-{}'.format(self.symbol), data)
 
@@ -110,10 +112,10 @@ class LiveDataThread(Thread):
         minutes = minutes[columns]
         for col in columns:
             minutes[col] = [self._parse_float(val) for val in list(minutes[col])]
-        minutes['date'] = [self._unix_time_millis(parse(str(val)))
-                           for val in list(minutes.index)]
+        minutes['date'] = [self._utc_datetime_str(val) for val in list(minutes.index)]
         columns = {col: col.lower() for col in columns}
         minutes = minutes.rename(columns=columns)
+        print(minutes)
         return [row for row in minutes.T.to_dict().values()]
 
     def emit_intraday_data(self, data):
@@ -142,10 +144,8 @@ class LiveDataThread(Thread):
         return '{:.2f}{}'.format(n / 10 ** (3 * mill_idx), MILL_NAMES[mill_idx])
 
     @staticmethod
-    def _unix_time_millis(dt):
-        dt = dt.replace(tzinfo=None)
-        epoch = datetime.datetime.utcfromtimestamp(0)
-        return (dt - epoch).total_seconds() * 1000.0
+    def _utc_datetime_str(dt):
+        return str(parse(str(dt)).astimezone(pytz.utc))
 
 
 @io.on('connect')

@@ -62,6 +62,8 @@ const MainCardTitle = ({ name, symbol, handleSettingsIconClicked }) => {
   const { price, prevClose, open, high, low, volume,
     marketStatus, lastUpdate, change, changePercentage } = quote;
 
+  console.log(lastUpdate)
+
   if (quoteIsLoading) {
     return (
       <MDBCardTitle style={{ height: '35px' }}>
@@ -103,7 +105,7 @@ const MainCardTitle = ({ name, symbol, handleSettingsIconClicked }) => {
             <tr>
               <td className={style.smaller}>
                 <span className={style.grey}>
-                  {`${marketStatus} ${lastUpdate && (new Date(lastUpdate)).toLocaleTimeString()}`}
+                  {`${marketStatus} ${lastUpdate && (new Date(lastUpdate)).toLocaleString()}`}
                 </span>
                 {
                   change !== undefined &&
