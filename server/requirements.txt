@@ -6,3 +6,4 @@ yfinance
 pandas
 python-dateutil
 pytz
+pandas_market_calendars

@@ -1,11 +1,12 @@
-import datetime
 import json
 import math
 import time
 import traceback
 from threading import Thread, Lock
+import datetime
 
 import pandas as pd
+import pandas_market_calendars
 import pytz
 import yfinance as yf
 from dateutil.parser import parse
@@ -13,13 +14,16 @@ from flask import request
 from flask_socketio import SocketIO
 from yahoo_fin import stock_info as si
 
-from constants import MILL_NAMES
+from constants import MILL_NAMES, TICKERS
 from webapp import app
 
 io = SocketIO(app, cors_allowed_origins="*")
 
 _threads = dict()   # symbol to thread mapping
 _sessions = dict()  # session id to symbols
+
+nyse = pandas_market_calendars.get_calendar('NYSE')
+hkex = pandas_market_calendars.get_calendar('HKEX')
 
 
 class LiveDataThread(Thread):
@@ -80,7 +84,6 @@ class LiveDataThread(Thread):
         volume = self._millify(minutes['Volume'].sum())
         change = price - prev_close
         change_percentage = self._parse_float(change / prev_close * 100, 2)
-        market_status = 'M. Close'
         last_update = self._utc_datetime_str(list(minutes.index)[-1])
         data = {
             'price': price,
@@ -91,7 +94,7 @@ class LiveDataThread(Thread):
             'change': change,
             'changePercentage': change_percentage,
             'volume': str(volume),
-            'marketStatus': market_status,
+            'marketStatus': self._get_market_status(),
             'lastUpdate': last_update
         }
         return data
@@ -144,6 +147,31 @@ class LiveDataThread(Thread):
     @staticmethod
     def _utc_datetime_str(dt):
         return str(parse(str(dt)).astimezone(pytz.utc))
+
+    def _get_market_status(self):
+        ticker = TICKERS.get(self.symbol)
+        currency = ticker.info['currency']
+        now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+        today = str(now.date())
+        if currency == 'USD':
+            schedule = nyse.schedule(start_date=today, end_date=today, tz='UTC')
+            if len(schedule) == 1 and schedule['market_open'][today].replace(tzinfo=pytz.utc) <= now \
+                    <= schedule['market_close'][today].replace(tzinfo=pytz.utc):
+                return 'M. Open'
+            return 'M. Close'
+        elif currency == 'HKD':
+            schedule = hkex.schedule(start_date=today, end_date=today, tz='UTC')
+            if len(schedule) == 1:
+                if schedule['market_open'][today].replace(tzinfo=pytz.utc) <= now \
+                        <= schedule['break_start'][today].replace(tzinfo=pytz.utc):
+                    return 'M. Open'
+                elif schedule['break_start'][today].replace(tzinfo=pytz.utc) <= now \
+                        <= schedule['break_end'][today].replace(tzinfo=pytz.utc):
+                    return 'M. Break'
+                elif schedule['break_end'][today].replace(tzinfo=pytz.utc) <= now \
+                        <= schedule['break_end'][today].replace(tzinfo=pytz.utc):
+                    return 'M. Open'
+            return 'M. Close'
 
 
 @io.on('connect')
